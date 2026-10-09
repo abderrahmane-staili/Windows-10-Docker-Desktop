@@ -15,7 +15,11 @@
   </a>
 </p>
 
-**Hands-on roadmap for AI Automation infrastructure.**
+<h2>
+  **A hands-on learning journey focused on building reliable infrastructure for AI automation, AI agents, and n8n workflows. Covering Docker, PostgreSQL, Linux, containerization, persistent storage, and deployment.**
+</h2>
+
+<h2>**Hands-on roadmap for AI Automation infrastructure.**</h2>
 
 ---
 
