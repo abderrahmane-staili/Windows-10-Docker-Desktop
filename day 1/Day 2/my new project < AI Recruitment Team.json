@@ -1,0 +1,713 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## AI Recruitment Team (MVP)\n\n**Flow:**\n1. Form: Job Description + CVs (PDF)\n2. Supervisor Agent: kay7ll l Job w kay7added criteria\n3. CV Screening Agent: kaystakhrej profile mn kol CV (JSON)\n4. Job Matching Agent: score + evidence + missing skills\n5. Report Agent: rapport final + drafts dial messages\n\n**Mohim:** l AI kay3awn ghir f tanzim. Lqarar nihaei dyal recruiter. Ma kaysift hta message bla mowafaqa.\n\n**Bach tkhdem:** zid credential dyal LLM f les 4 nodes 'OpenAI ...' (ola bddlhom b Gemini / Claude / Ollama).",
+        "height": 340,
+        "width": 480
+      },
+      "id": "c26b8cf7-a77b-4106-8fed-be96e887d15c",
+      "name": "Notes - Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -832,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "formTitle": "AI Recruitment Team",
+        "formDescription": "Dkhel Job Description w upload les CVs (PDF).",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Job Description",
+              "fieldType": "textarea",
+              "placeholder": "Job title, responsibilities, required skills...",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "CVs",
+              "fieldType": "file",
+              "acceptFileTypes": ".pdf",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d3078885-9c81-4f7a-8ce3-89871e84699f",
+      "name": "Job + CVs Form",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -400,
+        688
+      ],
+      "webhookId": "6bffc217-3ff1-460f-a642-f509bc70f5fd"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -320,
+        976
+      ],
+      "id": "f4f81b24-6522-47de-a51f-94a89c63174a",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "pPUmz9DqVW1Cainf",
+          "name": "ABDERRAHMANE--OFFIC"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "Analyze the job_title and job_description if provided.\n\nExtract:\n- Required skills\n- Preferred skills\n- Responsibilities\n- Relevant project types\n- Experience requirements\n- Education requirements\n\nIf only the job title is provided, identify your analysis as an estimate, not verified employer requirements.\n\nReturn valid JSON:\n\n{\n  \"job_title\": \"\",\n  \"required_skills\": [],\n  \"preferred_skills\": [],\n  \"responsibilities\": [],\n  \"relevant_project_types\": [],\n  \"experience_requirements\": [],\n  \"education_requirements\": [],\n  \"uncertainties\": []\n}\n\nDo not invent employer requirements. Return JSON only."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 3,
+      "position": [
+        -368,
+        1296
+      ],
+      "id": "0a67b62b-075f-41fb-a4d4-3384add326d5",
+      "name": "skills employers"
+    },
+    {
+      "parameters": {
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "=Evaluate how well the candidate's CV matches the job requirements.\n\nInputs:\n- job_title\n- job_requirements\n- cv_text\n\nCompare the candidate's skills, experience, and projects against the job requirements.\n\nReturn:\n- match_score (0-100)\n- matching_skills\n- partially_matching_skills\n- missing_or_unverified_skills\n- relevant_projects\n- evidence\n- recommendation\n- explanation\n- questions_for_human_review\n\nRecommendations:\n- Strong Match\n- Potential Match\n- Weak Match\n- Insufficient Information\n\nBase every conclusion on CV evidence. Do not invent information or treat unmentioned skills as definitively absent.\n\nReturn valid JSON only. The final hiring decision belongs to the human recruiter."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 3,
+      "position": [
+        240,
+        1264
+      ],
+      "id": "ed1591f0-d696-474c-bbb5-e350fa16fd29",
+      "name": "is it good"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Job + CVs Form').item.json['Job Description'] }}\n\n{{ $json.data }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are the Supervisor of an AI Recruitment Team.\n\n1. Receive the job_title and cv_text.\n2. Call \"skills employers\" to extract the job requirements, skills, responsibilities, and relevant projects.\n3. Pass the extracted requirements, job_title, and cv_text to \"is it good\".\n4. Return the final evaluation from \"is it good\".\n\nDo not invent information. Ensure both tools are called.\nReturn the job requirements, matching skills, missing or unverified skills, relevant projects, match score, recommendation, and explanation.\n\nThe final hiring decision belongs to the human recruiter."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        0,
+        688
+      ],
+      "id": "56c972ee-8e73-4a53-90c8-e989afb28022",
+      "name": "AI supervisore"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        -304,
+        1472
+      ],
+      "id": "bd01e8fb-c387-407d-ab53-e9dd04f9788a",
+      "name": "Think"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        320,
+        1440
+      ],
+      "id": "0f68db45-7acc-49b0-83e4-42596713a705",
+      "name": "Think1"
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "binaryPropertyName": "CVs",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -192,
+        688
+      ],
+      "id": "bce5158e-389f-4d8d-bd7d-f8dfdeca0d08",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -432,
+        1472
+      ],
+      "id": "5e0b8648-b021-4e29-a453-8b06918a1770",
+      "name": "OpenAI1",
+      "credentials": {
+        "openAiApi": {
+          "id": "pPUmz9DqVW1Cainf",
+          "name": "ABDERRAHMANE--OFFIC"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        192,
+        1440
+      ],
+      "id": "84b5be5b-b5ac-4360-b374-eaf09117fe3f",
+      "name": "OpenAI2",
+      "credentials": {
+        "openAiApi": {
+          "id": "pPUmz9DqVW1Cainf",
+          "name": "ABDERRAHMANE--OFFIC"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst raw = $input.first().json.output;\n\nfunction extractList(text, start, endMarkers = []) {\n  const startIndex = text.indexOf(start);\n  if (startIndex === -1) return [];\n\n  let section = text.slice(startIndex + start.length);\n\n  const positions = endMarkers\n    .map(marker => section.indexOf(marker))\n    .filter(index => index !== -1);\n\n  if (positions.length) {\n    section = section.slice(0, Math.min(...positions));\n  }\n\n  return section\n    .split(\"\\n\")\n    .map(line => line.replace(/^\\s*-\\s*/, \"\").trim())\n    .filter(line => line && !line.endsWith(\":\"));\n}\n\nfunction extractValue(text, label) {\n  const regex = new RegExp(\n    `-\\\\s*${label}:\\\\s*(.+)`,\n    \"i\"\n  );\n  return text.match(regex)?.[1]?.trim() ?? \"\";\n}\n\nconst scoreMatch = raw.match(\n  /Match score\\s*\\(0-100\\)\\s*[\\s\\S]*?-\\s*(\\d+)/i\n);\n\nconst result = {\n  job_title: extractValue(raw, \"Job title\"),\n  required_skills: extractList(\n    raw,\n    \"Required skills:\",\n    [\"Preferred skills:\", \"Responsibilities:\"]\n  ),\n  preferred_skills: extractList(\n    raw,\n    \"Preferred skills:\",\n    [\"Responsibilities:\", \"Experience:\"]\n  ),\n  matching_skills: extractList(\n    raw,\n    \"Matching skills (explicitly supported by the CV)\",\n    [\"Missing or unverified skills\", \"Relevant projects\"]\n  ),\n  missing_skills: extractList(\n    raw,\n    \"Missing or unverified skills\",\n    [\"Relevant projects\", \"Match score\"]\n  ),\n  relevant_projects: extractList(\n    raw,\n    \"Relevant projects (from CV)\",\n    [\"Match score\"]\n  ),\n  score: scoreMatch ? Number(scoreMatch[1]) : null,\n  recommendation: extractValue(raw, \"Recommendation\"),\n  experience: extractValue(raw, \"Experience\"),\n  education: extractValue(raw, \"Education\"),\n  explanation: extractList(\n    raw,\n    \"Explanation and evidence\",\n    [\"Suggested next steps\", \"Note:\"]\n  ).join(\" \"),\n  interview_questions: extractList(\n    raw,\n    \"Suggested next steps / questions for interview\",\n    [\"Note:\"]\n  )\n};\n\nreturn [{ json: result }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        688
+      ],
+      "id": "073408c1-a9f6-420d-a24d-27607a688b40",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "content": "# Employer score \n\n## give me the employer skills and her project...",
+        "height": 368,
+        "width": 496,
+        "color": "#B35000"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        48,
+        1216
+      ],
+      "id": "20764af8-b4de-4b0a-9443-908bcd37bb28",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 3,
+      "position": [
+        768,
+        1280
+      ],
+      "id": "1d7e907e-226c-4a8a-9b0b-23625801d98f",
+      "name": "AI Agent Tool"
+    },
+    {
+      "parameters": {
+        "content": "# Employer score \n\n## give me the employer skills and her project...",
+        "height": 400,
+        "width": 560,
+        "color": "#027A00"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        608,
+        1248
+      ],
+      "id": "1b7ae52b-56b7-4298-994b-c52556eda8e4",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "# I'm a note \n**Double click** to edit me. [Guide](https://docs.n8n.io/workflows/components/sticky-notes/)",
+        "height": 624,
+        "width": 1776,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -576,
+        1120
+      ],
+      "id": "306a68f6-444b-44f9-b39d-e45fd783b5e6",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5.4-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-5.4-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        720,
+        1472
+      ],
+      "id": "a4884d02-6499-4177-b7d6-3788002759a0",
+      "name": "OpenAI3",
+      "credentials": {
+        "openAiApi": {
+          "id": "pPUmz9DqVW1Cainf",
+          "name": "ABDERRAHMANE--OFFIC"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "=Send a message in Slack {{ $('Extract from File').item.json.data }}",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0BJ9SV1XDX",
+          "mode": "list",
+          "cachedResultName": "bmo"
+        },
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message_Text', ``, 'string') }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slackTool",
+      "typeVersion": 2.5,
+      "position": [
+        976,
+        1472
+      ],
+      "id": "855b6312-c6df-46cc-b01f-f666a244fc60",
+      "name": "Send a message",
+      "webhookId": "b9e305a2-c6f1-4219-941b-3c9d1e5b0efd",
+      "credentials": {
+        "slackApi": {
+          "id": "LPpCHIM4WQ6HgwCQ",
+          "name": "Abderrahman Staili"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "ow6sUw03kIYO92k9",
+          "mode": "list",
+          "cachedResultName": "customers",
+          "cachedResultUrl": "/projects/F4ekx8YZS7qLOocl/datatables/ow6sUw03kIYO92k9"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "customerID": 0
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "customerID",
+              "displayName": "customerID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "customerCountry",
+              "displayName": "customerCountry",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "customerEmail",
+              "displayName": "customerEmail",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "customerSince",
+              "displayName": "customerSince",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "region",
+              "displayName": "region",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "subregion",
+              "displayName": "subregion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        800,
+        688
+      ],
+      "id": "2bf4e589-d546-4b9e-aae9-14ff3b4c1b78",
+      "name": "Insert row"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.score }}",
+                    "rightValue": 70,
+                    "operator": {
+                      "type": "number",
+                      "operation": "gt"
+                    },
+                    "id": "9ddcbcc2-e023-4033-b8ec-73cb596e6b64"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "up 70"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "d2149286-0b27-46ea-83e5-39bb5c657b01",
+                    "leftValue": "={{ $json.score }}",
+                    "rightValue": 70,
+                    "operator": {
+                      "type": "number",
+                      "operation": "lt"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "down"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        560,
+        688
+      ],
+      "id": "da53e30e-0c50-477c-94b0-c58d964548a6",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "content": "# Employer score \n\n## give me the employer skills and her project...",
+        "height": 352,
+        "width": 464,
+        "color": "#B35000"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -512,
+        1264
+      ],
+      "id": "2e5d80b2-3d95-4a80-a002-fed049dda6bf",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "\n{\n  \"type\": \"object\",\n  \"properties\": {\n    \"job_title\": {\n      \"type\": \"string\"\n    },\n    \"job_requirements\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      }\n    },\n    \"match_score\": {\n      \"type\": \"number\"\n    },\n    \"matching_skills\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      }\n    },\n    \"partially_matching_skills\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      }\n    },\n    \"missing_or_unverified_skills\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      }\n    },\n    \"recommendation\": {\n      \"type\": \"string\"\n    },\n    \"explanation\": {\n      \"type\": \"string\"\n    }\n  },\n  \"required\": [\n    \"job_title\",\n    \"job_requirements\",\n    \"match_score\",\n    \"matching_skills\",\n    \"partially_matching_skills\",\n    \"missing_or_unverified_skills\",\n    \"recommendation\",\n    \"explanation\"\n  ],\n  \"additionalProperties\": false\n}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -176,
+        976
+      ],
+      "id": "c74e4c5d-26a8-404a-ad94-93ff766ebc4a",
+      "name": "CODE </>"
+    }
+  ],
+  "connections": {
+    "Job + CVs Form": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI supervisore",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "skills employers": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI supervisore",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "is it good": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI supervisore",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI supervisore": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "skills employers",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think1": {
+      "ai_tool": [
+        [
+          {
+            "node": "is it good",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "AI supervisore",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "skills employers",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "is it good",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI supervisore",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent Tool",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent Tool",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Insert row",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "CODE </>": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI supervisore",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "500acbc15071f27dd48d1ec68955f9a2da0e93e5405945678b09708cd048df90"
+  }
+}
