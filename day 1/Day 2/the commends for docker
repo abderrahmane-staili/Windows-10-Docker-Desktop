@@ -1,0 +1,226 @@
+🐳 Docker Commands — AI Automation Developer
+🔍 1. Information & Monitoring
+
+1. docker --version
+
+📌 المعنى: كيعرض نسخة Docker المثبتة عندك.
+
+2. docker info
+
+📌 المعنى: كيعرض معلومات على Docker Engine، التخزين، الشبكات، وعدد الـ Containers والـ Images.
+
+3. docker ps
+
+📌 المعنى: كيعرض غير الـ Containers اللي خدامين دابا.
+
+4. docker ps -a
+
+📌 المعنى: كيعرض جميع الـ Containers، حتى اللي متوقفين.
+
+🔹 -a = all.
+
+5. docker images
+
+📌 المعنى: كيعرض الـ Images اللي مخزنين محلياً عندك.
+
+6. docker volume ls
+
+📌 المعنى: كيعرض جميع الـ Volumes اللي Docker كيدبّرهم لتخزين البيانات.
+
+7. docker network ls
+
+📌 المعنى: كيعرض الشبكات اللي كيتواصلو عبرها الـ Containers.
+
+8. docker inspect local-n8n
+
+📌 المعنى: كيعرض التفاصيل التقنية ديال Container، بحال إعدادات الشبكة، Ports، Volumes وEnvironment.
+
+📋 2. Logs & Debugging
+
+9. docker logs local-n8n
+
+📌 المعنى: كيعرض Logs ديال n8n باش تعرف واش كاين شي خطأ.
+
+10. docker logs -f local-n8n
+
+📌 المعنى: كيتبع Logs مباشرة وكيعرض الأسطر الجديدة ملي كتظهر.
+
+🔹 -f = follow.
+
+11. docker logs --tail 100 local-n8n
+
+📌 المعنى: كيعرض آخر 100 سطر من Logs.
+
+🔹 --tail 100 = عرض آخر 100 سطر.
+
+12. docker stats
+
+📌 المعنى: كيعرض استهلاك CPU وRAM والشبكة ديال الـ Containers اللي خدامين.
+
+▶️ 3. Container Management
+
+13. docker start local-n8n
+
+📌 المعنى: كيشغّل Container موجود ومتوقف.
+
+14. docker stop local-n8n
+
+📌 المعنى: كيوقف Container خدام بطريقة عادية.
+
+15. docker restart local-n8n
+
+📌 المعنى: كيوقف Container وكيعاود يشغلو.
+
+16. docker rm CONTAINER_NAME
+
+📌 المعنى: كيحذف Container متوقف. ماشي هو نفس الأمر اللي كيحذف الـ Image أو الـ Volume.
+
+⚠️ تأكد من البيانات والتخزين المرتبطين به قبل الحذف.
+
+17. docker exec -it local-n8n sh
+
+📌 المعنى: كيشغّل Shell تفاعلي داخل Container، إلا كان sh متوفر فيه.
+
+🔹 -i = Interactive، كيبقي الإدخال مفتوح.
+
+🔹 -t = TTY، كيوفر Terminal تفاعلي.
+
+18. docker pull postgres:16
+
+📌 المعنى: كينزّل Image ديال PostgreSQL الإصدار 16 من Registry.
+
+19. docker rmi IMAGE_NAME
+
+📌 المعنى: كيحذف Image من التخزين المحلي، إلا ما كانتش محمية بسبب استعمالها من Containers.
+
+🔹 rmi = Remove Image.
+
+💾 4. Volumes & Networks
+
+20. docker volume ls
+
+📌 المعنى: كيعرض أسماء الـ Volumes الموجودة.
+
+21. docker volume inspect VOLUME_NAME
+
+📌 المعنى: كيعرض معلومات على Volume محدد.
+
+22. docker volume create my_data
+
+📌 المعنى: كينشئ Volume جديد باسم my_data.
+
+23. docker volume rm my_data
+
+📌 المعنى: كيحذف Volume غير مستعمل من Container.
+
+⚠️ حذف Volume يقدر يضيّع البيانات المخزنة فيه نهائياً.
+
+24. docker network ls
+
+📌 المعنى: كيعرض Networks الموجودة فـ Docker.
+
+25. docker network inspect NETWORK_NAME
+
+📌 المعنى: كيعرض تفاصيل Network، ومنها الـ Containers المرتبطة بها.
+
+⚙️ 5. Docker Compose
+
+26. docker compose version
+
+📌 المعنى: كيعرض نسخة Docker Compose.
+
+27. docker compose -f compos-test.yml config
+
+📌 المعنى: كيقرا ملف Compose وكيعرض الإعدادات النهائية ديالو.
+
+🔹 -f = File، كتعني أنك كتحدد الملف اللي بغيتي تستعمل.
+
+28. docker compose -f compos-test.yml --env-file dockerr.env pull
+
+📌 المعنى: كينزّل الـ Images اللي محتاجها المشروع حسب ملف Compose.
+
+🔹 --env-file = كيحدد ملف المتغيرات بحال أسماء المستخدمين وكلمات المرور.
+
+29. docker compose -f compos-test.yml --env-file dockerr.env up -d
+
+📌 المعنى: كينشئ أو كيحدّث وكيشغّل Services ديال المشروع فالخلفية.
+
+🔹 up = إنشاء وتشغيل Services.
+
+🔹 -d = Detached، يعني الخدمة كتبقى خدامة بلا ما يبقى Terminal تابع ليها.
+
+30. docker compose -f compos-test.yml --env-file dockerr.env ps
+
+📌 المعنى: كيعرض حالة الـ Containers التابعة للمشروع.
+
+31. docker compose -f compos-test.yml --env-file dockerr.env logs
+
+📌 المعنى: كيعرض Logs ديال Services ديال المشروع.
+
+32. docker compose -f compos-test.yml --env-file dockerr.env logs -f
+
+📌 المعنى: كيتبع Logs ديال Services مباشرة.
+
+🔹 -f هنا = Follow، ماشي File.
+
+33. docker compose -f compos-test.yml --env-file dockerr.env stop
+
+📌 المعنى: كيوقف Services بلا ما يحذف Containers ديالها.
+
+34. docker compose -f compos-test.yml --env-file dockerr.env start
+
+📌 المعنى: كيعوّد يشغّل Services الموجودة والمتوقفة.
+
+35. docker compose -f compos-test.yml --env-file dockerr.env restart
+
+📌 المعنى: كيعوّد يشغّل Services من جديد.
+
+36. docker compose -f compos-test.yml --env-file dockerr.env down
+
+📌 المعنى: كيوقف ويحذف Containers وNetwork اللي أنشأهم Compose. الـ Named Volumes كيبقاو عادةً محفوظين.
+
+37. docker compose -f compos-test.yml --env-file dockerr.env down -v
+
+📌 المعنى: بحال down، ولكن كيطلب كذلك حذف الـ Named Volumes المرتبطة بالمشروع.
+
+⚠️ هاد الأمر يقدر يمسح بيانات PostgreSQL وإعدادات n8n المخزنة فالـ Volumes. ما تستعملوش إلا كنت متأكد أنك ما محتاجش هاد البيانات.
+
+🧩 6. أهم الرموز اللي خاصك تفهم
+
+-f
+
+📌 المعنى: File فـ أوامر بحال docker compose -f compos-test.yml، ولكن Follow فـ docker logs -f.
+
+-d
+
+📌 المعنى: Detached، تشغيل الخدمة فالخلفية.
+
+-a
+
+📌 المعنى: All، مثلاً docker ps -a كيعرض حتى Containers المتوقفة.
+
+-i
+
+📌 المعنى: Interactive، كيبقي الإدخال التفاعلي مفتوح.
+
+-t
+
+📌 المعنى: تخصيص Terminal تفاعلي.
+
+-it
+
+📌 المعنى: الجمع بين -i و-t، باش تتفاعل مع برنامج داخل Container.
+
+-v
+
+📌 المعنى: المعنى كيتبدل حسب الأمر. مثلاً فـ docker compose down -v كيعني حذف الـ Named Volumes المرتبطة بالمشروع.
+
+--env-file
+
+📌 المعنى: تحديد ملف فيه Environment Variables اللي كيستعملها Docker Compose.
+
+--tail 100
+
+📌 المعنى: عرض آخر 100 سطر من Logs.
+
+🎯 الأوامر الأكثر أهمية ليك دابا كـ AI Automation Developer: docker ps -a، docker images، docker logs، docker inspect، docker exec، docker volume ls، وdocker compose up -d. هادو غادي يعاونوك تشغّل n8n وPostgreSQL، تراقبهم، وتشخّص المشاكل ملي تبني Workflows ومشاريع أكبر.
